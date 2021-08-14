@@ -12,7 +12,21 @@
                     </div>
                 </div>
             </header>
-            <section>
+            <section :class='animation'>
+                <h2>{{ formSteps[activeStep].title }}</h2>
+                <div class="input-fields">
+                    <div class='input-container'
+                        v-for='(field, index) in formSteps[activeStep].fields'
+                        :key="'field' + index"
+                    >
+                        <input type="text" v-model='field.value' required>
+                        <label class='input-label'>{{ field.label }}</label>
+                    </div>
+                </div>  
+                <div class="actions">
+                    <button v-if='activeStep + 1 < formSteps.length'>next</button>
+                    <button v-if='activeStep + 1 === formSteps.length'>done</button>
+                </div>
 
             </section>
         </article>
@@ -23,6 +37,7 @@ export default {
     data: () => {
         return {
             activeStep: 0,
+            animation: 'animate-in',
             formSteps: [
                 {
                     title: 'HTML Quiz',
@@ -79,6 +94,7 @@ export default {
         width: calc(100% - 20px);
         max-width: 720px;
         min-height: 480px;
+        perspective: 1000px;
 
         header {
             @include flexbox();
@@ -103,7 +119,122 @@ export default {
 
             &.active {
                 background-color: #DF5C2E;
+
+                ~ .progress-step {
+                    color: #555;
+                    background-color: #ccc;
+                }
+
+                ~ .progress-step::before {
+                    background-color: #ccc;
+                }
             }
+
+            &:before {
+                content: '';
+                position: absolute;
+                top: -20px;
+                width: 2px;
+                height: 20px;
+                background-color: #DF5C2E;
+                z-index: 10;
+            }
+
+            &:first-child::before {
+                display: none;
+            }
+        }
+
+        section {
+            @include flexbox();
+            flex-direction: column;
+            width: 100%;
+            background-color: #fff;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, .2),
+                        0 10px 10px rgba(0, 0, 0, .2);
+
+            h2 {
+                font-size: 1.6rem;
+                color: #DF5C2E;
+                margin: 0;
+                padding: 20px;
+            }
+
+            .input-fields {
+                @include flexbox();
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .input-container {
+                position: relative;
+                padding: 30px 20px 20px 20px;
+                width: calc(100% - 40px);
+                max-width: 400px;
+            }
+
+            input {
+                position: relative;
+                width: 100%;
+                font-family: 'Noto Sans', sans-serif;
+                font-size: 1.35rem;
+                outline: none;
+                background: transparent;
+                box-shadow: none;
+                border: none;
+                border-bottom: 2px dashed #DF5C2E;
+
+                &:valid + .input-label {
+                    top: 10px;
+                    left: 20px;
+                    font-size: .7rem;
+                    font-weight: normal;
+                    color: #999;
+                }
+            }
+        }
+
+        .input-label {
+            position: absolute;
+            top: 32px;
+            left: 20px;
+            font-size: 1.35rem;
+            pointer-events: none;
+            transition: .2s ease-in-out;
+        }
+
+        .actions {
+            margin: 0;
+
+            button {
+                font-family: 'Noto Sans', sans-serif;
+                outline: none;
+                border: none;
+                color: #fff;
+                background-color: #DF5C2E;
+                font-size: 1.35rem;  
+                padding: 5px 20px;
+                margin: 0;
+                text-transform: uppercase;
+                border-radius: 3px;
+                cursor: pointer;
+            }
+        }
+    }
+
+    .animate-in {
+        transform-origin: left;
+        animation: in .6s ease-in-out;
+    }
+
+    @keyframes in {
+        0% {
+            opacity: 0;
+            transform: rotateY(-90deg);
+        }
+        100% {
+            opacity: 1;
+            transform: rotateY(0deg);
         }
     }
 
