@@ -19,13 +19,13 @@
                         v-for='(field, index) in formSteps[activeStep].fields'
                         :key="'field' + index"
                     >
-                        <input type="text" v-model='field.value' required>
+                        <input type="text" :class="{'wrong-input': !field.valid}" v-model='field.value' required>
                         <label class='input-label'>{{ field.label }}</label>
                     </div>
                 </div>  
                 <div class="actions">
-                    <button v-if='activeStep + 1 < formSteps.length'>next</button>
-                    <button v-if='activeStep + 1 === formSteps.length'>done</button>
+                    <button v-if='activeStep + 1 < formSteps.length' @click='checkFields'>next</button>
+                    <button v-if='activeStep + 1 === formSteps.length' @click='checkFields'>done</button>
                 </div>
 
             </section>
@@ -67,6 +67,35 @@ export default {
                     title: 'Thank you for participating!'
                 }
             ]
+        }
+    },
+    methods: {
+        nextStep() {
+            this.animation = 'animate-out';
+            setTimeout(() => {
+                this.animation = 'animate-in';
+                this.activeStep += 1;
+            }, 550);
+        },
+        checkFields() {
+          let valid = true;
+          this.formSteps[this.activeStep].fields.forEach( field => {
+              if(!field.pattern.test(field.value)) {
+                  valid = false;
+                  field.valid = false;
+              } else {
+                  field.valid = true;
+              }
+          });
+
+          if(valid) {
+            this.nextStep();
+          } else {
+            this.animation = 'animate-wrong';
+            setTimeout(() => {
+                this.animation = '';
+            }, 400);
+          }
         }
     }
 }
@@ -191,6 +220,10 @@ export default {
                     font-weight: normal;
                     color: #999;
                 }
+
+                &.wrong-input + .input-label {
+                    color: #B92938;
+                }
             }
         }
 
@@ -227,6 +260,15 @@ export default {
         animation: in .6s ease-in-out;
     }
 
+    .animate-out {
+        transform-origin: bottom left;
+        animation: out .7s ease-in-out;
+    }
+
+    .animate-wrong {
+        animation: wrong .4s ease-in-out;
+    }
+
     @keyframes in {
         0% {
             opacity: 0;
@@ -236,6 +278,21 @@ export default {
             opacity: 1;
             transform: rotateY(0deg);
         }
+    }
+
+    @keyframes out {
+        0% { transform: translateY(0px) rotate(0deg); }
+        60% { transform: rotate(10deg); }
+        100% { transform: translateY(1000px); }
+    }
+
+    @keyframes wrong {
+        0% { transform: translateX(0); }
+        20% { transform: translateX(40px); }
+        40% { transform: translateX(20px); }
+        60% { transform: translateX(40px); }
+        80% { transform: translateX(20px); }
+        100% { transform: translateX(0); }
     }
 
 </style>
